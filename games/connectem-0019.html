@@ -66,8 +66,6 @@
 		   border: 3px solid var(--accent);
 		   box-shadow: 0 0 20px rgba(74, 144, 226, 0.3);
 		   object-fit: cover;
-		   margin: 30px 0;
-		   background: var(--board);
 		}
 
 		#start-difficulty {
@@ -194,7 +192,6 @@
 		   margin-bottom: 15px;
 		   border: 3px solid var(--accent);
 		   box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-		   background: var(--board);
 		}
 
 		.profile h3 {
@@ -307,53 +304,53 @@
    </style>
 </head>
 <body>
-	<div class="start-screen">
-	   <h1>Connect Em vs AI</h1>
-	   <img class="robot-preview" id="start-avatar" alt="AI">
-	   <select id="start-difficulty">
-		   <option value="easy">Easy</option>
-		   <option value="medium" selected>Regular</option>
-		   <option value="hard">Hard</option>
-		   <option value="expert">Expert</option>  
-	   </select>
-	   <button class="start-btn" onclick="startGame()">Start Game</button>
-	</div>
+   <div class="start-screen">
+       <h1>Connect Em vs AI</h1>
+       <img class="robot-preview" id="start-avatar" alt="AI">
+       <select id="start-difficulty">
+           <option value="easy">Easy</option>
+           <option value="medium" selected>Regular</option>
+           <option value="hard">Hard</option>
+           <option value="expert">Expert</option>
+       </select>
+       <button class="start-btn" onclick="startGame()">Start Game</button>
+   </div>
 
-	<div class="game-content">
-	   <h1>Connect Em vs AI</h1>
-	   <div class="game-container">
-		   <div class="board">
-			   <div class="game-board" id="board"></div>
-		   </div>
-		   
-		   <div class="info-panel">
-			   <div class="profile">
-				   <img id="ai-avatar" alt="AI Avatar">
-				   <h3 id="ai-name">AI Opponent</h3>
-			   </div>
-			   
-			   <select id="difficulty">
-				   <option value="easy">Easy</option>
-				   <option value="medium" selected>Regular</option>
-				   <option value="hard">Hard</option>
-				   <option value="expert">Expert</option>
-			   </select>
-			   
-			   <div class="score">
-				   Player: <span id="player-score">0</span>
-				   AI: <span id="ai-score">0</span>
-			   </div>
-			   
-			   <div class="status" id="status">Your turn!</div>
-			   <button class="give-up" onclick="giveUp()">Give Up</button>
-		   </div>
-	   </div>
+   <div class="game-content">
+       <h1>Connect Em vs AI</h1>
+       <div class="game-container">
+           <div class="board">
+               <div class="game-board" id="board"></div>
+           </div>
+           
+           <div class="info-panel">
+               <div class="profile">
+                   <img id="ai-avatar" alt="AI Avatar">
+                   <h3 id="ai-name">AI Opponent</h3>
+               </div>
+               
+               <select id="difficulty">
+                   <option value="easy">Easy</option>
+                   <option value="medium" selected>Regular</option>
+                   <option value="hard">Hard</option>
+                   <option value="expert">Expert</option>
+               </select>
+               
+               <div class="score">
+                   Player: <span id="player-score">0</span>
+                   AI: <span id="ai-score">0</span>
+               </div>
+               
+              <div class="status" id="status">Your turn!</div>
+              <button class="give-up" onclick="giveUp()">Give Up</button>
+           </div>
+       </div>
 
-	   <div class="winner-modal" id="winner-modal">
-		   <h2 id="winner-text"></h2>
-		   <button onclick="startNewGame()">Play Again</button>
-	   </div>
-	</div>
+       <div class="winner-modal" id="winner-modal">
+           <h2 id="winner-text"></h2>
+           <button onclick="startNewGame()">Play Again</button>
+       </div>
+   </div>
 
    <script>
        const ROWS = 6;
@@ -667,43 +664,19 @@
 			loadAIProfile(difficulty);
 		}
 
-		function setAvatarImages(url) {
-		   const avatars = ['ai-avatar', 'start-avatar'];
-		   avatars.forEach(id => {
-			   const img = document.getElementById(id);
-			   if (img) img.src = url;
-		   });
-		}
-
 		function loadAIProfile(difficulty) {
-		   // First try to show cached avatar
 		   const profile = localStorage.getItem(`ai_profile_${difficulty}`);
 		   if (profile) {
-			   try {
-				   const {avatar, name} = JSON.parse(profile);
-				   setAvatarImages(avatar);
-				   document.getElementById('ai-name').textContent = name;
-				   return;
-			   } catch (err) {
-				   localStorage.removeItem(`ai_profile_${difficulty}`);
-			   }
+			   const {avatar, name} = JSON.parse(profile);
+			   document.getElementById('ai-avatar').src = avatar;
+			   document.getElementById('start-avatar').src = avatar; // Update start screen avatar
+			   document.getElementById('ai-name').textContent = name;
+			   return;
 		   }
 
 		   const seed = Math.floor(Math.random() * 1000000);
 		   const avatarUrl = `https://image.pollinations.ai/prompt/robot%20avatar%20friendly%20cute%20minimalist?seed=${seed}&width=120&height=120&nologo=true`;
 		   
-		   // Set default avatar immediately while API call happens
-		   setAvatarImages(avatarUrl);
-		   document.getElementById('ai-name').textContent = "Friendly Bot";
-
-		   // Store default profile
-		   const defaultProfile = {
-			   avatar: avatarUrl,
-			   name: "Friendly Bot"
-		   };
-		   localStorage.setItem(`ai_profile_${difficulty}`, JSON.stringify(defaultProfile));
-
-		   // Try to get custom name from API
 		   fetch('https://text.pollinations.ai/', {
 			   method: 'POST',
 			   headers: { 'Content-Type': 'application/json' },
@@ -722,12 +695,24 @@
 				   name: data.choices[0].message.content
 			   };
 			   localStorage.setItem(`ai_profile_${difficulty}`, JSON.stringify(profile));
+			   document.getElementById('ai-avatar').src = avatarUrl;
+			   document.getElementById('start-avatar').src = avatarUrl;
 			   document.getElementById('ai-name').textContent = profile.name;
 		   })
-		   .catch(() => {}); // Ignore errors - default name will remain
+		   .catch(() => {
+			   const profile = {
+				   avatar: avatarUrl,
+				   name: "Friendly Bot"
+			   };
+			   localStorage.setItem(`ai_profile_${difficulty}`, JSON.stringify(profile));
+			   document.getElementById('ai-avatar').src = avatarUrl;
+			   document.getElementById('start-avatar').src = avatarUrl;
+			   document.getElementById('ai-name').textContent = profile.name;
+		   });
 		}
 
        // Event Listeners and Initialization
+       document.getElementById('new-game').onclick = startNewGame;
        document.getElementById('difficulty').onchange = (e) => {
            loadAIProfile(e.target.value);
            startNewGame();

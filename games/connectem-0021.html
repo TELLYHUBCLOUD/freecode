@@ -66,8 +66,6 @@
 		   border: 3px solid var(--accent);
 		   box-shadow: 0 0 20px rgba(74, 144, 226, 0.3);
 		   object-fit: cover;
-		   margin: 30px 0;
-		   background: var(--board);
 		}
 
 		#start-difficulty {
@@ -187,6 +185,24 @@
 		   text-align: center;
 		}
 
+		.profile-preview {
+			width: 180px;
+			height: 180px;
+			border-radius: 50%;
+			background: var(--board);
+			padding: 3px;
+			border: 3px solid var(--accent);
+			box-shadow: 0 0 20px rgba(74, 144, 226, 0.3);
+			margin: 30px 0;
+		}
+
+		.robot-preview {
+			width: 100%;
+			height: 100%;
+			border-radius: 50%;
+			object-fit: cover;
+		}
+
 		.profile img {
 		   width: 120px;
 		   height: 120px;
@@ -194,7 +210,6 @@
 		   margin-bottom: 15px;
 		   border: 3px solid var(--accent);
 		   box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-		   background: var(--board);
 		}
 
 		.profile h3 {
@@ -308,52 +323,54 @@
 </head>
 <body>
 	<div class="start-screen">
-	   <h1>Connect Em vs AI</h1>
-	   <img class="robot-preview" id="start-avatar" alt="AI">
-	   <select id="start-difficulty">
-		   <option value="easy">Easy</option>
-		   <option value="medium" selected>Regular</option>
-		   <option value="hard">Hard</option>
-		   <option value="expert">Expert</option>  
-	   </select>
-	   <button class="start-btn" onclick="startGame()">Start Game</button>
+		<h1>Connect Em vs AI</h1>
+		<div class="profile-preview">
+			<img class="robot-preview" id="start-avatar" alt="AI">
+		</div>
+		<select id="start-difficulty">
+			<option value="easy">Easy</option>
+			<option value="medium" selected>Regular</option>
+			<option value="hard">Hard</option>
+			<option value="expert">Expert</option>
+		</select>
+		<button class="start-btn" onclick="startGame()">Start Game</button>
 	</div>
 
-	<div class="game-content">
-	   <h1>Connect Em vs AI</h1>
-	   <div class="game-container">
-		   <div class="board">
-			   <div class="game-board" id="board"></div>
-		   </div>
-		   
-		   <div class="info-panel">
-			   <div class="profile">
-				   <img id="ai-avatar" alt="AI Avatar">
-				   <h3 id="ai-name">AI Opponent</h3>
-			   </div>
-			   
-			   <select id="difficulty">
-				   <option value="easy">Easy</option>
-				   <option value="medium" selected>Regular</option>
-				   <option value="hard">Hard</option>
-				   <option value="expert">Expert</option>
-			   </select>
-			   
-			   <div class="score">
-				   Player: <span id="player-score">0</span>
-				   AI: <span id="ai-score">0</span>
-			   </div>
-			   
-			   <div class="status" id="status">Your turn!</div>
-			   <button class="give-up" onclick="giveUp()">Give Up</button>
-		   </div>
-	   </div>
+   <div class="game-content">
+       <h1>Connect Em vs AI</h1>
+       <div class="game-container">
+           <div class="board">
+               <div class="game-board" id="board"></div>
+           </div>
+           
+           <div class="info-panel">
+               <div class="profile">
+                   <img id="ai-avatar" alt="AI Avatar">
+                   <h3 id="ai-name">AI Opponent</h3>
+               </div>
+               
+               <select id="difficulty">
+                   <option value="easy">Easy</option>
+                   <option value="medium" selected>Regular</option>
+                   <option value="hard">Hard</option>
+                   <option value="expert">Expert</option>
+               </select>
+               
+               <div class="score">
+                   Player: <span id="player-score">0</span>
+                   AI: <span id="ai-score">0</span>
+               </div>
+               
+              <div class="status" id="status">Your turn!</div>
+              <button class="give-up" onclick="giveUp()">Give Up</button>
+           </div>
+       </div>
 
-	   <div class="winner-modal" id="winner-modal">
-		   <h2 id="winner-text"></h2>
-		   <button onclick="startNewGame()">Play Again</button>
-	   </div>
-	</div>
+       <div class="winner-modal" id="winner-modal">
+           <h2 id="winner-text"></h2>
+           <button onclick="startNewGame()">Play Again</button>
+       </div>
+   </div>
 
    <script>
        const ROWS = 6;
@@ -728,6 +745,7 @@
 		}
 
        // Event Listeners and Initialization
+       document.getElementById('new-game').onclick = startNewGame;
        document.getElementById('difficulty').onchange = (e) => {
            loadAIProfile(e.target.value);
            startNewGame();

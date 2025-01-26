@@ -728,6 +728,7 @@
 		}
 
        // Event Listeners and Initialization
+       document.getElementById('new-game').onclick = startNewGame;
        document.getElementById('difficulty').onchange = (e) => {
            loadAIProfile(e.target.value);
            startNewGame();

@@ -5,355 +5,251 @@
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
    <title>Connect Em vs AI</title>
    <style>
-		:root {
-		   --darker: #121212;
-		   --dark: #1a1a1a;
-		   --board: #2a2a2a;
-		   --accent: #4a90e2;
-		   --text: #ffffff;
-		   --player: #e74c3c;
-		   --ai: #f1c40f;
-		}
+       :root {
+           --darker: #121212;
+           --dark: #1a1a1a;
+           --board: #2a2a2a;
+           --accent: #4a90e2;
+           --text: #ffffff;
+           --player: #e74c3c;
+           --ai: #f1c40f;
+       }
 
-		body {
-		   margin: 0;
-		   padding: 20px;
-		   min-height: 100vh;
-		   font-family: system-ui, sans-serif;
-		   background: var(--darker);
-		   color: var(--text);
-		   display: flex;
-		   flex-direction: column;
-		   align-items: center;
-		}
-
-		body > h1 {
-		   width: 100%;
-		   text-align: center;
-		   margin: 20px 0;
-		}
+       body {
+           margin: 0;
+           padding: 20px;
+           min-height: 100vh;
+           font-family: system-ui, sans-serif;
+           background: var(--darker);
+           color: var(--text);
+           display: flex;
+           flex-direction: column;
+           align-items: center;
+       }
 
 		.game-container {
 		   display: flex;
 		   flex-direction: column;
-		   align-items: center;
+		   gap: 20px;
 		   width: 100%;
-		   max-width: 800px;
+		   max-width: 500px;
 		   margin: 0 auto;
-		   padding: 20px;
-		}
-
-		.start-screen {
-		   position: fixed;
-		   top: 0;
-		   left: 0;
-		   width: 100%;
-		   height: 100vh;
-		   background: var(--darker);
-		   display: flex;
-		   flex-direction: column;
-		   align-items: center;
-		   justify-content: center;
-		   gap: 30px;
-		   padding: 20px;
-		   z-index: 1000;
-		}
-
-		.robot-preview {
-		   width: 180px;
-		   height: 180px;
-		   border-radius: 50%;
-		   border: 3px solid var(--accent);
-		   box-shadow: 0 0 20px rgba(74, 144, 226, 0.3);
-		   object-fit: cover;
-		   margin: 30px 0;
-		   background: var(--board);
-		}
-
-		#start-difficulty {
-		   width: 300px;
-		   padding: 12px;
-		   font-size: 1.1em;
-		   background: var(--dark);
-		   color: var(--text);
-		   border: 2px solid var(--accent);
-		   border-radius: 8px;
-		}
-
-		.start-btn {
-		   width: 300px;
-		   padding: 15px;
-		   font-size: 1.2em;
-		   background: var(--accent);
-		   color: var(--text);
-		   border: none;
-		   border-radius: 8px;
-		   cursor: pointer;
-		   transition: transform 0.2s;
-		}
-
-		.start-btn:hover {
-		   transform: scale(1.05);
-		}
-
-		.game-content {
-		   display: none;
-		   width: 100%;
-		   text-align: center;
-		}
-
-		.game-content.visible {
-		   display: block;
-		}
-
-		.start-screen.hidden {
-		   display: none;
 		}
 
 		.board {
 		   width: 100%;
-		   max-width: 600px;
-		   aspect-ratio: 7/6;
+		   aspect-ratio: 7/6; 
+		   height: auto;
+		   max-height: 80vh;
 		   background: var(--board);
 		   border-radius: 10px;
 		   padding: 15px;
 		   position: relative;
 		   box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-		   margin: 0 auto;
 		}
 
-		.game-board {
-		   width: 100%;
-		   height: 100%;
-		   display: grid;
-		   grid-template-columns: repeat(7, 1fr);
-		   grid-template-rows: repeat(6, 1fr);
-		   gap: 8px;
-		   position: relative;
-		}
+       .game-board {
+           width: 100%;
+           height: 100%;
+           display: grid;
+           grid-template-columns: repeat(7, 1fr);
+           grid-template-rows: repeat(6, 1fr);
+           gap: 8px;
+           position: relative;
+       }
 
-		.cell {
-		   background: var(--dark);
-		   border-radius: 50%;
-		   position: relative;
-		   cursor: pointer;
-		   transition: background 0.2s;
-		}
+       .cell {
+           background: var(--dark);
+           border-radius: 50%;
+           position: relative;
+           cursor: pointer;
+           transition: background 0.2s;
+       }
 
-		.cell:hover {
-		   background: #222;
-		}
+       .cell:hover {
+           background: #222;
+       }
 
-		.piece {
-		   position: absolute;
-		   width: 90%;
-		   height: 90%;
-		   border-radius: 50%;
-		   top: 5%;
-		   left: 5%;
-		   transform: translateY(-500%);
-		   transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-		}
+       .piece {
+           position: absolute;
+           width: 90%;
+           height: 90%;
+           border-radius: 50%;
+           top: 5%;
+           left: 5%;
+           transform: translateY(-500%);
+           transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+       }
 
-		.piece.player {
-		   background: var(--player);
-		   box-shadow: 0 4px 8px rgba(231, 76, 60, 0.3);
-		}
+       .piece.player {
+           background: var(--player);
+           box-shadow: 0 4px 8px rgba(231, 76, 60, 0.3);
+       }
 
-		.piece.ai {
-		   background: var(--ai);
-		   box-shadow: 0 4px 8px rgba(241, 196, 15, 0.3);
-		}
+       .piece.ai {
+           background: var(--ai); 
+           box-shadow: 0 4px 8px rgba(241, 196, 15, 0.3);
+       }
 
-		.piece.dropped {
-		   transform: translateY(0);
-		}
+       .piece.dropped {
+           transform: translateY(0);
+       }
 
 		.info-panel {
 		   background: var(--board);
-		   width: 100%;
-		   max-width: 400px;
-		   margin: 20px auto;
-		   padding: 25px;
+		   padding: 20px;
 		   border-radius: 10px;
+		   width: 100%;
 		   box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+		   display: grid;
+		   grid-template-columns: 1fr 1fr;
+		   gap: 15px;
 		}
 
 		.profile {
-		   padding: 20px;
+		   display: flex;
+		   flex-direction: column;
+		   align-items: center;
 		   margin-bottom: 20px;
-		   border-radius: 8px;
-		   background: var(--dark);
-		   text-align: center;
+		   grid-column: 1 / -1;
 		}
 
 		.profile img {
 		   width: 120px;
 		   height: 120px;
 		   border-radius: 60px;
-		   margin-bottom: 15px;
+		   margin-bottom: 10px;
 		   border: 3px solid var(--accent);
-		   box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-		   background: var(--board);
-		}
-
-		.profile h3 {
-		   margin: 0;
-		   color: var(--text);
 		}
 
 		select {
 		   width: 100%;
-		   padding: 12px;
+		   padding: 8px;
 		   background: var(--dark);
 		   color: var(--text);
 		   border: 1px solid var(--accent);
 		   border-radius: 5px;
-		   margin: 15px 0;
-		   font-size: 1em;
+		   margin: 10px 0;
+		   grid-column: 1 / -1;
 		}
 
 		.score {
 		   text-align: center;
 		   font-size: 1.2em;
-		   margin: 20px 0;
+		   margin: 15px 0;
+		   grid-column: 1 / -1;
 		}
 
 		.status {
 		   text-align: center;
 		   color: var(--accent);
 		   font-weight: bold;
-		   margin: 20px 0;
-		   font-size: 1.1em;
+		   margin: 15px 0;
+		   grid-column: 1 / -1;
 		}
 
-		.give-up {
-		   width: 100%;
-		   padding: 12px;
-		   background: #e74c3c;
-		   color: var(--text);
-		   border: none;
-		   border-radius: 5px;
-		   cursor: pointer;
-		   font-size: 1em;
-		   margin-top: 20px;
-		   transition: opacity 0.2s;
-		}
+       button {
+           width: 100%;
+           padding: 10px;
+           background: var(--accent);
+           color: var(--text);
+           border: none;
+           border-radius: 5px;
+           cursor: pointer;
+           font-size: 1em;
+       }
 
-		.give-up:hover {
-		   opacity: 0.9;
-		}
+       button:hover {
+           opacity: 0.9;
+       }
 
-		.winner-modal {
-		   position: fixed;
-		   top: 50%;
-		   left: 50%;
-		   transform: translate(-50%, -50%);
-		   background: var(--board);
-		   padding: 30px;
-		   border-radius: 10px;
-		   text-align: center;
-		   display: none;
-		   box-shadow: 0 8px 24px rgba(0,0,0,0.6);
-		   z-index: 100;
-		   min-width: 300px;
-		}
+       .winner-modal {
+           position: fixed;
+           top: 50%;
+           left: 50%;
+           transform: translate(-50%, -50%);
+           background: var(--board);
+           padding: 30px;
+           border-radius: 10px;
+           text-align: center;
+           display: none;
+           box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+           z-index: 100;
+       }
 
-		.winner-modal.show {
-		   display: block;
-		}
-
-		.winner-modal button {
-		   width: 100%;
-		   padding: 12px;
-		   background: var(--accent);
-		   color: var(--text);
-		   border: none;
-		   border-radius: 5px;
-		   cursor: pointer;
-		   font-size: 1em;
-		   margin-top: 20px;
-		}
+       .winner-modal.show {
+           display: block;
+       }
 
 		@media (max-width: 480px) {
 		   body {
 			   padding: 10px;
 		   }
 
-		   .game-container {
-			   padding: 10px;
-		   }
-
 		   .board {
 			   padding: 10px;
+			   max-height: 70vh;
 		   }
 
-		   .info-panel {
-			   padding: 15px;
+		   .cell {
+			   font-size: 0.8rem;
 		   }
-
-		   .profile {
-			   padding: 15px;
-		   }
-
+		   
 		   .piece {
 			   width: 85%;
 			   height: 85%;
 			   top: 7.5%;
 			   left: 7.5%;
 		   }
+
+		   .info-panel {
+			   padding: 15px;
+		   }
 		}
 	   
    </style>
 </head>
 <body>
-	<div class="start-screen">
-	   <h1>Connect Em vs AI</h1>
-	   <img class="robot-preview" id="start-avatar" alt="AI">
-	   <select id="start-difficulty">
-		   <option value="easy">Easy</option>
-		   <option value="medium" selected>Regular</option>
-		   <option value="hard">Hard</option>
-		   <option value="expert">Expert</option>  
-	   </select>
-	   <button class="start-btn" onclick="startGame()">Start Game</button>
-	</div>
+   <h1>Connect Em vs AI</h1>
+   
+   <div class="game-container">
+		<div class="start-screen">
+			<h1>Connect Em vs AI</h1>
+			<img class="robot-preview" src="[ai-avatar]" alt="AI">
+			<select id="difficulty">...</select>
+			<button class="start-btn">Start Game</button>
+		</div>
+       <div class="board">
+           <div class="game-board" id="board"></div>
+       </div>
+       
+       <div class="info-panel">
+           <div class="profile">
+               <img id="ai-avatar" alt="AI Avatar">
+               <h3 id="ai-name">AI Opponent</h3>
+           </div>
+           
+           <select id="difficulty">
+               <option value="easy">Easy</option>
+               <option value="medium" selected>Regular</option>
+               <option value="hard">Hard</option>
+               <option value="expert">Expert</option>
+           </select>
+           
+           <div class="score">
+               Player: <span id="player-score">0</span>
+               AI: <span id="ai-score">0</span>
+           </div>
+           
+           <div class="status" id="status">Your turn!</div>
+           <button id="new-game">New Game</button>
+       </div>
+   </div>
 
-	<div class="game-content">
-	   <h1>Connect Em vs AI</h1>
-	   <div class="game-container">
-		   <div class="board">
-			   <div class="game-board" id="board"></div>
-		   </div>
-		   
-		   <div class="info-panel">
-			   <div class="profile">
-				   <img id="ai-avatar" alt="AI Avatar">
-				   <h3 id="ai-name">AI Opponent</h3>
-			   </div>
-			   
-			   <select id="difficulty">
-				   <option value="easy">Easy</option>
-				   <option value="medium" selected>Regular</option>
-				   <option value="hard">Hard</option>
-				   <option value="expert">Expert</option>
-			   </select>
-			   
-			   <div class="score">
-				   Player: <span id="player-score">0</span>
-				   AI: <span id="ai-score">0</span>
-			   </div>
-			   
-			   <div class="status" id="status">Your turn!</div>
-			   <button class="give-up" onclick="giveUp()">Give Up</button>
-		   </div>
-	   </div>
-
-	   <div class="winner-modal" id="winner-modal">
-		   <h2 id="winner-text"></h2>
-		   <button onclick="startNewGame()">Play Again</button>
-	   </div>
-	</div>
+   <div class="winner-modal" id="winner-modal">
+       <h2 id="winner-text"></h2>
+       <button onclick="startNewGame()">Play Again</button>
+   </div>
 
    <script>
        const ROWS = 6;
@@ -403,10 +299,6 @@
                }, {once: true});
            });
        }
-
-		function giveUp() {
-			endGame(AI); // AI wins if player gives up
-		}
 
        async function handleClick(col) {
            if (!gameActive || currentPlayer !== PLAYER) return;
@@ -626,7 +518,7 @@
            return board[0].every(cell => cell !== EMPTY);
        }
 
-		function endGame(winner) {
+function endGame(winner) {
            gameActive = false;
            const modal = document.getElementById('winner-modal');
            const winnerText = document.getElementById('winner-text');
@@ -644,7 +536,7 @@
            document.getElementById('player-score').textContent = scores.player;
            document.getElementById('ai-score').textContent = scores.ai;
            modal.classList.add('show');
-		}
+       }
 
        function startNewGame() {
            board = Array(ROWS).fill().map(() => Array(COLS).fill(EMPTY));
@@ -657,77 +549,52 @@
            cells.forEach(cell => cell.innerHTML = '');
        }
 
-		function startGame() {
-			document.querySelector('.start-screen').classList.add('hidden');
-			document.querySelector('.game-content').classList.add('visible');
-			const difficulty = document.getElementById('start-difficulty').value;
-			document.getElementById('difficulty').value = difficulty;
-			
-			initializeBoard();
-			loadAIProfile(difficulty);
-		}
+       function loadAIProfile(difficulty) {
+           const profile = localStorage.getItem(`ai_profile_${difficulty}`);
+           if (profile) {
+               const {avatar, name} = JSON.parse(profile);
+               document.getElementById('ai-avatar').src = avatar;
+               document.getElementById('ai-name').textContent = name;
+               return;
+           }
 
-		function setAvatarImages(url) {
-		   const avatars = ['ai-avatar', 'start-avatar'];
-		   avatars.forEach(id => {
-			   const img = document.getElementById(id);
-			   if (img) img.src = url;
-		   });
-		}
-
-		function loadAIProfile(difficulty) {
-		   // First try to show cached avatar
-		   const profile = localStorage.getItem(`ai_profile_${difficulty}`);
-		   if (profile) {
-			   try {
-				   const {avatar, name} = JSON.parse(profile);
-				   setAvatarImages(avatar);
-				   document.getElementById('ai-name').textContent = name;
-				   return;
-			   } catch (err) {
-				   localStorage.removeItem(`ai_profile_${difficulty}`);
-			   }
-		   }
-
-		   const seed = Math.floor(Math.random() * 1000000);
-		   const avatarUrl = `https://image.pollinations.ai/prompt/robot%20avatar%20friendly%20cute%20minimalist?seed=${seed}&width=120&height=120&nologo=true`;
-		   
-		   // Set default avatar immediately while API call happens
-		   setAvatarImages(avatarUrl);
-		   document.getElementById('ai-name').textContent = "Friendly Bot";
-
-		   // Store default profile
-		   const defaultProfile = {
-			   avatar: avatarUrl,
-			   name: "Friendly Bot"
-		   };
-		   localStorage.setItem(`ai_profile_${difficulty}`, JSON.stringify(defaultProfile));
-
-		   // Try to get custom name from API
-		   fetch('https://text.pollinations.ai/', {
-			   method: 'POST',
-			   headers: { 'Content-Type': 'application/json' },
-			   body: JSON.stringify({
-				   messages: [{
-					   role: "system",
-					   content: "Generate a fun, friendly AI name that's 2-3 words long."
-				   }],
-				   seed: seed
-			   })
-		   })
-		   .then(response => response.json())
-		   .then(data => {
-			   const profile = {
-				   avatar: avatarUrl,
-				   name: data.choices[0].message.content
-			   };
-			   localStorage.setItem(`ai_profile_${difficulty}`, JSON.stringify(profile));
-			   document.getElementById('ai-name').textContent = profile.name;
-		   })
-		   .catch(() => {}); // Ignore errors - default name will remain
-		}
+           const seed = Math.floor(Math.random() * 1000000);
+           const avatarUrl = `https://image.pollinations.ai/prompt/robot%20avatar%20friendly%20cute%20minimalist?seed=${seed}&width=120&height=120&nologo=true`;
+           
+           fetch('https://text.pollinations.ai/', {
+               method: 'POST',
+               headers: { 'Content-Type': 'application/json' },
+               body: JSON.stringify({
+                   messages: [{
+                       role: "system",
+                       content: "Generate a fun, friendly AI name that's 2-3 words long."
+                   }],
+                   seed: seed
+               })
+           })
+           .then(response => response.json())
+           .then(data => {
+               const profile = {
+                   avatar: avatarUrl,
+                   name: data.choices[0].message.content
+               };
+               localStorage.setItem(`ai_profile_${difficulty}`, JSON.stringify(profile));
+               document.getElementById('ai-avatar').src = avatarUrl;
+               document.getElementById('ai-name').textContent = profile.name;
+           })
+           .catch(() => {
+               const profile = {
+                   avatar: avatarUrl,
+                   name: "Friendly Bot"
+               };
+               localStorage.setItem(`ai_profile_${difficulty}`, JSON.stringify(profile));
+               document.getElementById('ai-avatar').src = avatarUrl;
+               document.getElementById('ai-name').textContent = profile.name;
+           });
+       }
 
        // Event Listeners and Initialization
+       document.getElementById('new-game').onclick = startNewGame;
        document.getElementById('difficulty').onchange = (e) => {
            loadAIProfile(e.target.value);
            startNewGame();

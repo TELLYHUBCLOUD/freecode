@@ -1,0 +1,1962 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marble Race Simulator</title>
+    <style>
+        :root {
+            --primary: #3f51b5;
+            --primary-light: #757de8;
+            --secondary: #ff9800;
+            --dark: #212121;
+            --light: #f5f5f5;
+            --win: #4caf50;
+            --lose: #f44336;
+            --text: #333;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--dark);
+            color: var(--light);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+        
+		header {
+			background-color: var(--primary);
+			color: white;
+			padding: 0.75rem 0;
+			border-bottom: 4px solid var(--secondary);
+			margin-bottom: 0;
+		}
+
+		.header-content {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+		}
+
+		.game-title {
+			font-size: 1.75rem;
+			margin: 0;
+		}
+
+		.subtitle {
+			margin: 0;
+			font-size: 1rem;
+		}
+
+		.user-info {
+			background-color: var(--primary-light);
+			padding: 0.5rem 0;
+			margin-bottom: 1rem;
+		}
+
+		.user-info-content {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+		}
+
+		.user-info h3 {
+			margin: 0;
+			color: white;
+			font-size: 1rem;
+		}
+
+		.credit-display {
+			font-size: 1rem;
+			font-weight: bold;
+			color: var(--secondary);
+		}
+
+        /* Racer management panel */
+        .racer-management-panel {
+            background-color: #2d2d2d;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+            border: 1px solid var(--primary);
+            overflow: hidden;
+        }
+        
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            background-color: var(--primary);
+            cursor: pointer;
+        }
+        
+        .panel-header h3 {
+            margin: 0;
+            color: white;
+        }
+        
+        .panel-content {
+            padding: 1rem;
+        }
+        
+        .racer-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+        
+        .racer-input-group {
+            display: flex;
+            gap: 0.5rem;
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .racer-input {
+            flex: 1;
+            padding: 0.5rem;
+            border-radius: 4px;
+            border: 1px solid #555;
+            background-color: #444;
+            color: white;
+        }
+        
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+            border: none;
+            min-width: 90px;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--primary-light);
+        }
+        
+        .btn-secondary {
+            background-color: var(--secondary);
+            color: var(--dark);
+        }
+        
+        .btn-action {
+            background-color: #555;
+            color: white;
+        }
+        
+        .btn-action:hover {
+            background-color: #666;
+        }
+        
+        .btn:disabled {
+            background-color: #777;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        
+        .racer-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        
+        .racer-item {
+            background-color: var(--primary-light);
+            color: white;
+            padding: 0.5rem;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            position: relative;
+        }
+        
+        .marble {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        
+        .racer-name {
+            max-width: 120px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .remove-racer {
+            margin-left: 0.25rem;
+            cursor: pointer;
+            font-size: 0.8rem;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+        
+        .remove-racer:hover {
+            opacity: 1;
+        }
+        
+        /* Betting controls */
+        .betting-controls {
+            background-color: #2d2d2d;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+            border: 1px solid var(--primary);
+            padding: 1rem;
+        }
+        
+        .bet-row {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .bet-group {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+        
+        .bet-input {
+            width: 100px;
+            padding: 0.5rem;
+            border-radius: 4px;
+            border: 1px solid #555;
+            background-color: #444;
+            color: white;
+        }
+        
+        select.bet-input {
+            min-width: 150px;
+        }
+        
+        /* Race canvas container */
+        .race-container {
+            position: relative;
+            width: 100%;
+            height: 500px;
+            overflow: hidden;
+            border-radius: 10px;
+            border: 3px solid var(--primary);
+            background-color: #222;
+            margin-bottom: 1rem;
+        }
+        
+        #race-canvas {
+            width: 100%;
+            height: 100%;
+            background-color: transparent;
+        }
+        
+        /* Results display */
+        .results {
+            display: none;
+            padding: 1rem;
+            background-color: #2d2d2d;
+            border-radius: 5px;
+            margin-top: 1rem;
+            border: 1px solid var(--primary);
+        }
+        
+        .results.show {
+            display: block;
+        }
+        
+        .results-title {
+            text-align: center;
+            margin-bottom: 1rem;
+            color: var(--secondary);
+        }
+        
+        .results-list {
+            list-style: none;
+        }
+        
+        .result-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem;
+            border-bottom: 1px solid #444;
+        }
+        
+        .result-item:last-child {
+            border-bottom: none;
+        }
+        
+        .position {
+            font-size: 1.25rem;
+            font-weight: bold;
+            min-width: 30px;
+        }
+        
+        .position-1 {
+            color: gold;
+        }
+        
+        .position-2 {
+            color: silver;
+        }
+        
+        .position-3 {
+            color: #cd7f32; /* Bronze */
+        }
+        
+        .bet-result {
+            border-top: 1px solid #555;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            text-align: center;
+            font-size: 1.25rem;
+        }
+        
+        .win {
+            color: var(--win);
+        }
+        
+        .lose {
+            color: var(--lose);
+        }
+        
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem;
+            border-radius: 5px;
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            transform: translateX(150%);
+            transition: transform 0.3s ease-out;
+            z-index: 1000;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification.success {
+            background-color: var(--win);
+        }
+        
+        .notification.error {
+            background-color: var(--lose);
+        }
+        
+        .notification.info {
+            background-color: var(--primary);
+        }
+
+        /* Loading indicator */
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0,0,0,0.8);
+            padding: 1rem 2rem;
+            border-radius: 5px;
+            font-weight: bold;
+            color: white;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .racer-controls {
+                flex-direction: column;
+            }
+            
+            .race-container {
+                height: 400px;
+            }
+        }
+    </style>
+</head>
+<body>
+	<header>
+		<div class="container">
+			<div class="header-content">
+				<h1 class="game-title">🔴 Marble Race Simulator 🔵</h1>
+				<p class="subtitle">Add marbles, place bets, and watch them race!</p>
+			</div>
+		</div>
+	</header>
+
+    <main class="container">
+		<div class="user-info">
+			<div class="container">
+				<div class="user-info-content">
+					<h3>Player: <span id="player-name">Guest</span></h3>
+					<div class="credit-display">💸 Credits: <span id="credit-balance">1000</span></div>
+				</div>
+			</div>
+		</div>
+
+        <!-- Racer Management Panel -->
+        <div class="racer-management-panel">
+            <div class="panel-header">
+                <h3>Manage Marbles</h3>
+            </div>
+            <div class="panel-content">
+                <div class="racer-controls">
+                    <div class="racer-input-group">
+                        <input type="text" id="racer-name" class="racer-input" placeholder="Enter racer name">
+                        <button id="add-racer-button" class="btn btn-primary">Add Marble</button>
+                    </div>
+                    <div class="racer-action-buttons">
+                        <button id="random-race-button" class="btn btn-action">Random Race</button>
+                        <button id="clear-racers-button" class="btn btn-action">Clear All</button>
+                        <button id="shuffle-racers-button" class="btn btn-action">Shuffle</button>
+                    </div>
+                </div>
+                <div id="racer-list" class="racer-list">
+                    <!-- Racer items will be added here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Betting Controls -->
+        <div class="betting-controls">
+            <div class="bet-row">
+                <div class="bet-group">
+                    <label for="race-wager">Wager:</label>
+                    <input type="number" id="race-wager" class="bet-input" min="1" max="10000" value="100">
+                </div>
+                <div class="bet-group">
+                    <label for="marble-select">Marble:</label>
+                    <select id="marble-select" class="bet-input">
+                        <option value="" disabled selected>Select a marble</option>
+                    </select>
+                </div>
+                <div class="bet-group">
+                    <label for="bet-type">Bet Type:</label>
+                    <select id="bet-type" class="bet-input">
+                        <option value="win">WIN (4x)</option>
+                        <option value="place">PLACE (2x)</option>
+                        <option value="show">SHOW (1.5x)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="bet-row">
+                <button id="place-bet-button" class="btn btn-primary">Place Bet</button>
+                <button id="start-race-button" class="btn btn-secondary">Start Race</button>
+            </div>
+        </div>
+
+        <!-- Race Canvas -->
+        <div class="race-container">
+            <canvas id="race-canvas"></canvas>
+            <div id="loading" class="loading" style="display: none;">Loading Race...</div>
+        </div>
+
+        <!-- Results Section -->
+        <div id="results" class="results">
+            <h3 class="results-title">Race Results</h3>
+            <ol id="results-list" class="results-list">
+                <!-- Result items will be added here -->
+            </ol>
+            <div id="bet-result" class="bet-result">
+                <!-- Bet result will be shown here -->
+            </div>
+        </div>
+    </main>
+
+    <div id="notification" class="notification">Notification message</div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Game state
+            const gameState = {
+                playerName: localStorage.getItem('playerName') || 'Guest',
+                credits: parseInt(localStorage.getItem('credits')) || 1000,
+                wins: parseInt(localStorage.getItem('wins')) || 0,
+                losses: parseInt(localStorage.getItem('losses')) || 0,
+                racers: [],
+                betPlaced: false,
+                currentBet: {
+                    wager: 0,
+                    racerIndex: -1,
+                    betType: ''
+                },
+                raceInProgress: false,
+                raceResults: [],
+                raceSequence: [],
+                marbleColors: [
+                    '#f44336', // Red
+                    '#2196f3', // Blue
+                    '#4caf50', // Green
+                    '#ff9800', // Orange
+                    '#9c27b0', // Purple
+                    '#ffeb3b', // Yellow
+                    '#03a9f4', // Light Blue
+                    '#e91e63', // Pink
+                    '#00bcd4', // Teal
+                    '#8bc34a', // Light Green
+                    '#ff5722', // Deep Orange
+                    '#673ab7', // Deep Purple
+                    '#009688', // Green-Blue
+                    '#cddc39', // Lime
+                    '#795548', // Brown
+                    '#607d8b', // Blue Grey
+                    '#f06292', // Pink variant
+                    '#7986cb', // Indigo variant
+                    '#ffb74d', // Amber variant
+                    '#81c784'  // Green variant
+                ]
+            };
+
+            // Canvas and physics
+            const canvas = document.getElementById('race-canvas');
+            const ctx = canvas.getContext('2d');
+
+            // DOM Elements
+            const playerNameElem = document.getElementById('player-name');
+            const creditBalanceElem = document.getElementById('credit-balance');
+            const racerNameInput = document.getElementById('racer-name');
+            const addRacerButton = document.getElementById('add-racer-button');
+            const randomRaceButton = document.getElementById('random-race-button');
+            const clearRacersButton = document.getElementById('clear-racers-button');
+            const shuffleRacersButton = document.getElementById('shuffle-racers-button');
+            const racerList = document.getElementById('racer-list');
+            const marbleSelect = document.getElementById('marble-select');
+            const raceWagerInput = document.getElementById('race-wager');
+            const betTypeSelect = document.getElementById('bet-type');
+            const placeBetButton = document.getElementById('place-bet-button');
+            const startRaceButton = document.getElementById('start-race-button');
+            const resultsContainer = document.getElementById('results');
+            const resultsList = document.getElementById('results-list');
+            const betResultElem = document.getElementById('bet-result');
+            const notification = document.getElementById('notification');
+            const loadingIndicator = document.getElementById('loading');
+
+            // Race track segment templates - more varied layouts
+            const trackSegmentTemplates = [
+                {
+                    name: 'funnel-drop',
+                    create: (width, height, x, y) => {
+                        const segments = [];
+                        // Funnel sides
+                        segments.push({
+                            type: 'line',
+                            points: [
+                                { x: x + width * 0.1, y: y },
+                                { x: x + width * 0.45, y: y + height * 0.6 }
+                            ],
+                            thickness: 10
+                        });
+                        segments.push({
+                            type: 'line',
+                            points: [
+                                { x: x + width * 0.9, y: y },
+                                { x: x + width * 0.55, y: y + height * 0.6 }
+                            ],
+                            thickness: 10
+                        });
+                        // Bottom tube
+                        segments.push({
+                            type: 'line',
+                            points: [
+                                { x: x + width * 0.45, y: y + height * 0.6 },
+                                { x: x + width * 0.45, y: y + height }
+                            ],
+                            thickness: 10
+                        });
+                        segments.push({
+                            type: 'line',
+                            points: [
+                                { x: x + width * 0.55, y: y + height * 0.6 },
+                                { x: x + width * 0.55, y: y + height }
+                            ],
+                            thickness: 10
+                        });
+                        return segments;
+                    }
+                },
+                {
+                    name: 'zig-zag',
+                    create: (width, height, x, y) => {
+                        const segments = [];
+                        const steps = 5;
+                        const stepWidth = width / steps;
+                        const stepHeight = height / steps;
+                        
+                        for (let i = 0; i < steps - 1; i++) {
+                            segments.push({
+                                type: 'line',
+                                points: [
+                                    { x: x + stepWidth * i, y: y + stepHeight * i },
+                                    { x: x + stepWidth * (i + 1), y: y + stepHeight * (i + 1) }
+                                ],
+                                thickness: 10
+                            });
+                            
+                            if (i < steps - 2) {
+                                segments.push({
+                                    type: 'line',
+                                    points: [
+                                        { x: x + stepWidth * (i + 1), y: y + stepHeight * (i + 1) },
+                                        { x: x + stepWidth * (i + 1), y: y + stepHeight * (i + 2) }
+                                    ],
+                                    thickness: 10
+                                });
+                            }
+                        }
+                        
+                        return segments;
+                    }
+                },
+                {
+                    name: 'spiral',
+                    create: (width, height, x, y) => {
+                        const segments = [];
+                        const centerX = x + width / 2;
+                        const centerY = y + height / 2;
+                        const maxRadius = Math.min(width, height) * 0.45;
+                        const turns = 2;
+                        const pointsPerTurn = 20;
+                        
+                        for (let i = 0; i < turns * pointsPerTurn - 1; i++) {
+                            const angle1 = (i / pointsPerTurn) * Math.PI * 2;
+                            const angle2 = ((i + 1) / pointsPerTurn) * Math.PI * 2;
+                            const radius1 = maxRadius * (1 - i / (turns * pointsPerTurn));
+                            const radius2 = maxRadius * (1 - (i + 1) / (turns * pointsPerTurn));
+                            
+                            segments.push({
+                                type: 'line',
+                                points: [
+                                    { 
+                                        x: centerX + radius1 * Math.cos(angle1), 
+                                        y: centerY + radius1 * Math.sin(angle1) 
+                                    },
+                                    { 
+                                        x: centerX + radius2 * Math.cos(angle2), 
+                                        y: centerY + radius2 * Math.sin(angle2) 
+                                    }
+                                ],
+                                thickness: 10
+                            });
+                        }
+                        
+                        // Exit path
+                        segments.push({
+                            type: 'line',
+                            points: [
+                                { x: centerX, y: centerY + maxRadius * 0.2 },
+                                { x: centerX, y: y + height }
+                            ],
+                            thickness: 10
+                        });
+                        
+                        return segments;
+                    }
+                },
+                {
+                    name: 'bumpers',
+                    create: (width, height, x, y) => {
+                        const segments = [];
+                        const numBumpers = 5;
+                        const bumperWidth = width * 0.15;
+                        const baseY = y + height * 0.2;
+                        const spacing = (width - bumperWidth) / (numBumpers - 1);
+                        
+                        // Left wall
+                        segments.push({
+                            type: 'line',
+                            points: [
+                                { x: x, y: y },
+                                { x: x, y: y + height }
+                            ],
+                            thickness: 10
+                        });
+                        
+                        // Right wall
+                        segments.push({
+                            type: 'line',
+                            points: [
+                                { x: x + width, y: y },
+                                { x: x + width, y: y + height }
+                            ],
+                            thickness: 10
+                        });
+                        
+                        // Bumpers
+                        for (let i = 0; i < numBumpers; i++) {
+                            const bumperX = x + spacing * i;
+                            // Alternate bumper positions
+                            const bumperY = baseY + (i % 2 === 0 ? height * 0.2 : 0);
+                            
+                            segments.push({
+                                type: 'circle',
+                                position: { x: bumperX, y: bumperY },
+                                radius: 15
+                            });
+                        }
+                        
+                        return segments;
+                    }
+                },
+                {
+                    name: 'split-paths',
+                    create: (width, height, x, y) => {
+                        const segments = [];
+                        
+                        // Center divider
+                        segments.push({
+                            type: 'line',
+                            points: [
+                                { x: x + width / 2, y: y },
+                                { x: x + width / 2, y: y + height * 0.7 }
+                            ],
+                            thickness: 10
+                        });
+                        
+                        // Left wall
+                        segments.push({
+                            type: 'line',
+                            points: [
+                                { x: x, y: y },
+                                { x: x, y: y + height * 0.7 }
+                            ],
+                            thickness: 10
+                        });
+                        
+                        // Right wall
+                        segments.push({
+                            type: 'line',
+                            points: [
+                                { x: x + width, y: y },
+                                { x: x + width, y: y + height * 0.7 }
+                            ],
+                            thickness: 10
+                        });
+                        
+                        // Funnel at bottom
+                        segments.push({
+                            type: 'line',
+                            points: [
+                                { x: x, y: y + height * 0.7 },
+                                { x: x + width * 0.45, y: y + height }
+                            ],
+                            thickness: 10
+                        });
+                        
+                        segments.push({
+                            type: 'line',
+                            points: [
+                                { x: x + width, y: y + height * 0.7 },
+                                { x: x + width * 0.55, y: y + height }
+                            ],
+                            thickness: 10
+                        });
+                        
+                        return segments;
+                    }
+                },
+                {
+                    name: 'tube-drop',
+                    create: (width, height, x, y) => {
+                        const segments = [];
+                        const tubeLeft = x + width * 0.4;
+                        const tubeRight = x + width * 0.6;
+                        
+                        // Tube sides
+                        segments.push({
+                            type: 'line',
+                            points: [
+                                { x: tubeLeft, y: y },
+                                { x: tubeLeft, y: y + height }
+                            ],
+                            thickness: 10
+                        });
+                        
+                        segments.push({
+                            type: 'line',
+                            points: [
+                                { x: tubeRight, y: y },
+                                { x: tubeRight, y: y + height }
+                            ],
+                            thickness: 10
+                        });
+                        
+                        // Horizontal steps inside tube
+                        const stepCount = 5;
+                        const stepSpacing = height / stepCount;
+                        
+                        for (let i = 1; i < stepCount; i++) {
+                            const stepY = y + stepSpacing * i - 5;
+                            segments.push({
+                                type: 'line',
+                                points: [
+                                    { x: tubeLeft, y: stepY },
+                                    { x: tubeLeft + (tubeRight - tubeLeft) * (i % 2 ? 0.7 : 0.3), y: stepY }
+                                ],
+                                thickness: 5
+                            });
+                        }
+                        
+                        return segments;
+                    }
+                },
+                {
+                    name: 'podium-finish',
+                    create: (width, height, x, y) => {
+                        const segments = [];
+                        const podiumHeight = height * 0.3;
+                        const podiumSpacing = width * 0.05;
+                        const podiumWidth = (width - podiumSpacing * 2) / 3;
+                        
+                        // Left wall
+                        segments.push({
+                            type: 'line',
+                            points: [
+                                { x: x, y: y },
+                                { x: x, y: y + height - podiumHeight }
+                            ],
+                            thickness: 10
+                        });
+                        
+                        // Right wall
+                        segments.push({
+                            type: 'line',
+                            points: [
+                                { x: x + width, y: y },
+                                { x: x + width, y: y + height - podiumHeight }
+                            ],
+                            thickness: 10
+                        });
+                        
+                        // Funnels to podiums
+                        segments.push({
+                            type: 'line',
+                            points: [
+                                { x: x, y: y + height - podiumHeight },
+                                { x: x + podiumWidth * 0.5, y: y + height - podiumHeight }
+                            ],
+                            thickness: 10
+                        });
+                        
+                        segments.push({
+                            type: 'line',
+                            points: [
+                                { x: x + width, y: y + height - podiumHeight },
+                                { x: x + width - podiumWidth * 0.5, y: y + height - podiumHeight }
+                            ],
+                            thickness: 10
+                        });
+                        
+                        // Center dividers
+                        segments.push({
+                            type: 'line',
+                            points: [
+                                { x: x + width * 0.33, y: y },
+                                { x: x + width * 0.33, y: y + height - podiumHeight }
+                            ],
+                            thickness: 10
+                        });
+                        
+                        segments.push({
+                            type: 'line',
+                            points: [
+                                { x: x + width * 0.67, y: y },
+                                { x: x + width * 0.67, y: y + height - podiumHeight }
+                            ],
+                            thickness: 10
+                        });
+                        
+                        // Podium platforms
+                        segments.push({
+                            type: 'line',
+                            points: [
+                                { x: x + podiumWidth * 0.5 - podiumWidth * 0.4, y: y + height - podiumHeight * 0.667 },
+                                { x: x + podiumWidth * 0.5 + podiumWidth * 0.4, y: y + height - podiumHeight * 0.667 }
+                            ],
+                            thickness: 10
+                        });
+                        
+                        segments.push({
+                            type: 'line',
+                            points: [
+                                { x: x + width * 0.5 - podiumWidth * 0.4, y: y + height - podiumHeight },
+                                { x: x + width * 0.5 + podiumWidth * 0.4, y: y + height - podiumHeight }
+                            ],
+                            thickness: 10
+                        });
+                        
+                        segments.push({
+                            type: 'line',
+                            points: [
+                                { x: x + width - podiumWidth * 0.5 - podiumWidth * 0.4, y: y + height - podiumHeight * 0.333 },
+                                { x: x + width - podiumWidth * 0.5 + podiumWidth * 0.4, y: y + height - podiumHeight * 0.333 }
+                            ],
+                            thickness: 10
+                        });
+                        
+                        return segments;
+                    }
+                }
+            ];
+
+            // Initialize the game
+            initGame();
+
+            function initGame() {
+                updateUI();
+                setupMarbleRace();
+                setupEventListeners();
+            }
+
+            // Update UI elements
+            function updateUI() {
+                playerNameElem.textContent = gameState.playerName;
+                creditBalanceElem.textContent = gameState.credits;
+                updateRacerList();
+                updateMarbleSelect();
+            }
+
+            // Save game state to localStorage
+            function saveGameState() {
+                localStorage.setItem('playerName', gameState.playerName);
+                localStorage.setItem('credits', gameState.credits);
+                localStorage.setItem('wins', gameState.wins);
+                localStorage.setItem('losses', gameState.losses);
+            }
+
+            // Show notification
+            function showNotification(message, type) {
+                notification.textContent = message;
+                notification.className = 'notification';
+                notification.classList.add(type);
+                notification.classList.add('show');
+                
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                }, 3000);
+            }
+
+            // Setup event listeners
+            function setupEventListeners() {
+                // Racer management
+                addRacerButton.addEventListener('click', addRacer);
+                
+                // Enter key to add racer
+                racerNameInput.addEventListener('keyup', (e) => {
+                    if (e.key === 'Enter') {
+                        addRacer();
+                    }
+                });
+                
+                randomRaceButton.addEventListener('click', createRandomRace);
+                clearRacersButton.addEventListener('click', clearAllRacers);
+                shuffleRacersButton.addEventListener('click', shuffleRacers);
+                
+                // Handle racer removal
+                racerList.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('remove-racer')) {
+                        const index = parseInt(e.target.closest('.racer-item').dataset.index);
+                        removeRacer(index);
+                    }
+                });
+                
+                // Betting and race start
+                placeBetButton.addEventListener('click', placeBet);
+                startRaceButton.addEventListener('click', startRace);
+                
+                // Resize canvas when window resizes
+                window.addEventListener('resize', () => {
+                    resizeCanvas();
+                });
+            }
+
+            // Resize canvas to fit container
+			function resizeCanvas() {
+				const container = document.querySelector('.race-container');
+				canvas.width = container.clientWidth;
+				canvas.height = container.clientHeight;
+				
+				// Just redraw the background - no engine reference
+				const ctx = canvas.getContext('2d');
+				ctx.fillStyle = '#222';
+				ctx.fillRect(0, 0, canvas.width, canvas.height);
+			}
+
+            // Setup Matter.js for marble race
+			function setupMarbleRace() {
+				// Initialize with a simple canvas setup instead of Matter.js
+				resizeCanvas();
+				
+				// Draw the empty race track
+				const ctx = canvas.getContext('2d');
+				ctx.fillStyle = '#222';
+				ctx.fillRect(0, 0, canvas.width, canvas.height);
+			}
+
+            // Add a new racer
+			function addRacer() {
+				const name = racerNameInput.value.trim();
+				
+				if (!name) {
+					showNotification('Please enter a racer name', 'error');
+					return;
+				}
+				
+				// Limit the number of racers
+				if (gameState.racers.length >= 20) {
+					showNotification('Maximum 20 racers allowed', 'error');
+					return;
+				}
+				
+				// Get next color
+				const colorIndex = gameState.racers.length % gameState.marbleColors.length;
+				const color = gameState.marbleColors[colorIndex];
+				
+				gameState.racers.push({
+					name: name,
+					color: color
+				});
+				
+				racerNameInput.value = '';
+				
+				updateRacerList();
+				updateMarbleSelect();
+				
+				showNotification(`Added marble: ${name}`, 'success');
+			}
+
+            // Remove a racer
+            function removeRacer(index) {
+                if (gameState.raceInProgress) {
+                    showNotification('Cannot remove racers during a race', 'error');
+                    return;
+                }
+                
+                gameState.racers.splice(index, 1);
+                
+                updateRacerList();
+                updateMarbleSelect();
+                
+                showNotification('Marble removed', 'info');
+            }
+
+            // Create a random race with random racers
+            function createRandomRace() {
+                if (gameState.raceInProgress) {
+                    showNotification('Cannot create a race during a race', 'error');
+                    return;
+                }
+                
+                const numberOfRacers = Math.floor(Math.random() * 8) + 5; // 5-12 random racers
+                const names = ['SpeedRacer', 'Thunder', 'Flash', 'Bolt', 'Zoom', 'Blitz', 'Swift', 'Dash', 'Rocket', 'Rapid', 'Streak', 'Velocity', 'Comet', 'Meteor', 'Star', 'Blazer', 'Runner', 'Sprinter', 'Bullet', 'Lightning'];
+                
+                gameState.racers = [];
+                
+                for (let i = 0; i < numberOfRacers; i++) {
+                    const randomNameIndex = Math.floor(Math.random() * names.length);
+                    const name = names.splice(randomNameIndex, 1)[0];
+                    const color = gameState.marbleColors[i % gameState.marbleColors.length];
+                    
+                    gameState.racers.push({
+                        name: name,
+                        color: color
+                    });
+                }
+                
+                updateRacerList();
+                updateMarbleSelect();
+                
+                showNotification(`Created random race with ${numberOfRacers} marbles`, 'success');
+            }
+
+            // Clear all racers
+            function clearAllRacers() {
+                if (gameState.raceInProgress) {
+                    showNotification('Cannot clear racers during a race', 'error');
+                    return;
+                }
+                
+                gameState.racers = [];
+                
+                updateRacerList();
+                updateMarbleSelect();
+                
+                showNotification('All marbles cleared', 'info');
+            }
+
+            // Shuffle racers
+            function shuffleRacers() {
+                if (gameState.racers.length <= 1) {
+                    showNotification('Need at least 2 marbles to shuffle', 'error');
+                    return;
+                }
+                
+                if (gameState.raceInProgress) {
+                    showNotification('Cannot shuffle during a race', 'error');
+                    return;
+                }
+                
+                // Fisher-Yates shuffle algorithm
+                for (let i = gameState.racers.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [gameState.racers[i], gameState.racers[j]] = [gameState.racers[j], gameState.racers[i]];
+                }
+                
+                updateRacerList();
+                updateMarbleSelect();
+                
+                showNotification('Marbles shuffled!', 'info');
+            }
+
+            // Update racer list display
+            function updateRacerList() {
+                racerList.innerHTML = '';
+                
+                if (gameState.racers.length === 0) {
+                    const emptyMessage = document.createElement('div');
+                    emptyMessage.style.padding = '0.5rem';
+                    emptyMessage.style.color = '#888';
+                    emptyMessage.textContent = 'No marbles added yet. Add marbles above or create a random race.';
+                    racerList.appendChild(emptyMessage);
+                    return;
+                }
+                
+                gameState.racers.forEach((racer, index) => {
+                    const racerItem = document.createElement('div');
+                    racerItem.className = 'racer-item';
+                    racerItem.dataset.index = index;
+                    
+                    racerItem.innerHTML = `
+                        <div class="marble" style="background-color: ${racer.color};"></div>
+                        <span class="racer-name">${racer.name}</span>
+                        <span class="remove-racer">✕</span>
+                    `;
+                    
+                    racerList.appendChild(racerItem);
+                });
+            }
+
+            // Update marble select dropdown
+            function updateMarbleSelect() {
+                marbleSelect.innerHTML = '';
+                
+                if (gameState.racers.length === 0) {
+                    const option = document.createElement('option');
+                    option.value = '';
+                    option.textContent = 'No marbles yet';
+                    option.disabled = true;
+                    option.selected = true;
+                    marbleSelect.appendChild(option);
+                    return;
+                }
+                
+                const defaultOption = document.createElement('option');
+                defaultOption.value = '';
+                defaultOption.textContent = 'Select a marble';
+                defaultOption.disabled = true;
+                defaultOption.selected = true;
+                marbleSelect.appendChild(defaultOption);
+                
+                gameState.racers.forEach((racer, index) => {
+                    const option = document.createElement('option');
+                    option.value = index;
+                    option.textContent = `${racer.name}`;
+                    option.style.backgroundColor = racer.color;
+                    marbleSelect.appendChild(option);
+                });
+            }
+
+            // Place a bet
+            function placeBet() {
+                if (gameState.racers.length === 0) {
+                    showNotification('Add marbles first!', 'error');
+                    return;
+                }
+                
+                if (gameState.raceInProgress) {
+                    showNotification('Cannot place bet during a race', 'error');
+                    return;
+                }
+                
+                const wager = parseInt(raceWagerInput.value);
+                
+                if (isNaN(wager) || wager < 1 || wager > 10000) {
+                    showNotification('Bet must be between 1 and 10000', 'error');
+                    return;
+                }
+                
+                if (wager > gameState.credits) {
+                    showNotification('Not enough credits!', 'error');
+                    return;
+                }
+                
+                const racerIndex = parseInt(marbleSelect.value);
+                
+                if (isNaN(racerIndex)) {
+                    showNotification('Please select a marble', 'error');
+                    return;
+                }
+                
+                const betType = betTypeSelect.value;
+                
+                // Deduct wager
+                gameState.credits -= wager;
+                creditBalanceElem.textContent = gameState.credits;
+                
+                gameState.betPlaced = true;
+                gameState.currentBet = {
+                    wager,
+                    racerIndex,
+                    betType
+                };
+                
+                const selectedRacer = gameState.racers[racerIndex];
+                showNotification(`Bet placed on ${selectedRacer.name} to ${betType.toUpperCase()}`, 'info');
+                
+                // Disable betting controls
+                placeBetButton.disabled = true;
+                raceWagerInput.disabled = true;
+                marbleSelect.disabled = true;
+                betTypeSelect.disabled = true;
+                
+                saveGameState();
+            }
+
+            // Start the race
+			function startRace() {
+				if (gameState.raceInProgress) return;
+				
+				if (gameState.racers.length < 3) {
+					showNotification('Need at least 3 marbles to race', 'error');
+					return;
+				}
+				
+				gameState.raceInProgress = true;
+				resultsContainer.classList.remove('show');
+				loadingIndicator.style.display = 'block';
+				
+				// Disable controls
+				startRaceButton.disabled = true;
+				addRacerButton.disabled = true;
+				racerNameInput.disabled = true;
+				randomRaceButton.disabled = true;
+				clearRacersButton.disabled = true;
+				shuffleRacersButton.disabled = true;
+				
+				// Disable racer removal
+				document.querySelectorAll('.remove-racer').forEach(btn => {
+					btn.style.pointerEvents = 'none';
+					btn.style.opacity = '0.5';
+				});
+				
+				// Simulate race with random ordering instead of physics
+				setTimeout(() => {
+					loadingIndicator.style.display = 'none';
+					simulateRace();
+				}, 1500);
+			}
+
+			function simulateRace() {
+				// Create a copy of the racers array to shuffle
+				const racers = [...gameState.racers];
+				
+				// Randomize the finish order
+				for (let i = racers.length - 1; i > 0; i--) {
+					const j = Math.floor(Math.random() * (i + 1));
+					[racers[i], racers[j]] = [racers[j], racers[i]];
+				}
+				
+				// Set race results
+				gameState.raceResults = racers.map(racer => {
+					return {
+						index: gameState.racers.findIndex(r => r.name === racer.name),
+						name: racer.name,
+						color: racer.color
+					};
+				});
+				
+				// Show a simulation on the canvas
+				animateRace();
+			}
+
+			function animateRace() {
+				const ctx = canvas.getContext('2d');
+				
+				// Create stages for the race with some adjustments for timing and visuals
+				const stages = [
+					{
+						name: "Drop",
+						duration: 4000, // Longer duration
+						setup: () => {
+							return gameState.raceResults.map((racer, i) => {
+								return {
+									name: racer.name,
+									color: racer.color,
+									x: 100 + (canvas.width - 200) * (i / (gameState.raceResults.length - 1)),
+									y: 20,
+									vx: 0,
+									vy: 0,
+									radius: 15,
+									index: racer.index,
+									position: i,
+									completed: false,
+									released: false,
+									releaseTime: 500 + Math.random() * 1000 // Random release time
+								};
+							});
+						},
+						update: (racers, elapsed, stageDuration) => {
+							racers.forEach(racer => {
+								// Release marbles at their designated time
+								if (!racer.released && elapsed > racer.releaseTime) {
+									racer.released = true;
+									racer.vy = 0.5 + Math.random() * 0.8; // Slower initial velocity
+								}
+								
+								if (racer.released) {
+									racer.y += racer.vy;
+									racer.vy += 0.05; // Reduced gravity for slower fall
+									
+									// Stop at bottom
+									if (racer.y > canvas.height - 50) {
+										racer.y = canvas.height - 50;
+										racer.completed = true;
+									}
+								}
+							});
+							
+							// Only complete when all marbles are at the bottom AND we've used at least 75% of the time
+							return racers.every(r => r.completed) && elapsed > stageDuration * 0.75;
+						},
+						draw: (ctx, racers) => {
+							// Draw funnel
+							ctx.fillStyle = '#555';
+							ctx.beginPath();
+							ctx.moveTo(50, canvas.height - 50);
+							ctx.lineTo(canvas.width - 50, canvas.height - 50);
+							ctx.lineTo(canvas.width / 2 + 30, canvas.height);
+							ctx.lineTo(canvas.width / 2 - 30, canvas.height);
+							ctx.fill();
+						}
+					},
+					{
+						name: "Slide",
+						duration: 6000, // Longer duration
+						setup: (prevRacers) => {
+							// Sort by completion time from previous stage
+							const sorted = [...prevRacers].sort((a, b) => {
+								if (a.completed && !b.completed) return -1;
+								if (!a.completed && b.completed) return 1;
+								return a.y - b.y;
+							});
+							
+							return sorted.map((racer, i) => {
+								return {
+									name: racer.name,
+									color: racer.color,
+									x: canvas.width / 2,
+									y: 20,
+									vx: 0,
+									vy: 0,
+									radius: 15,
+									index: racer.index,
+									position: i,
+									pathProgress: 0,
+									completed: false,
+									speed: 0.001 + Math.random() * 0.001 // Slower speed
+								};
+							});
+						},
+						update: (racers, elapsed, stageDuration) => {
+							racers.forEach(racer => {
+								// Move along zigzag path
+								racer.pathProgress += racer.speed;
+								
+								if (racer.pathProgress >= 1) {
+									racer.pathProgress = 1;
+									racer.completed = true;
+								}
+								
+								// Calculate position along zigzag path
+								const zigzags = 5;
+								const progress = racer.pathProgress;
+								const segmentWidth = 1 / zigzags;
+								
+								const segment = Math.floor(progress / segmentWidth);
+								const segmentProgress = (progress % segmentWidth) / segmentWidth;
+								
+								if (segment % 2 === 0) {
+									// Going right
+									racer.x = (canvas.width / 2 - 150) + segmentProgress * 300;
+								} else {
+									// Going left
+									racer.x = (canvas.width / 2 + 150) - segmentProgress * 300;
+								}
+								
+								racer.y = 50 + (progress * (canvas.height - 100));
+							});
+							
+							// Only complete when all marbles have completed AND we've used at least 75% of the time
+							return racers.every(r => r.completed) && elapsed > stageDuration * 0.75;
+						},
+						draw: (ctx, racers) => {
+							// Draw zigzag path
+							ctx.strokeStyle = '#555';
+							ctx.lineWidth = 20;
+							ctx.beginPath();
+							
+							const zigzags = 5;
+							let x = canvas.width / 2 - 150;
+							let y = 50;
+							ctx.moveTo(x, y);
+							
+							for (let i = 0; i < zigzags; i++) {
+								if (i % 2 === 0) {
+									x = canvas.width / 2 + 150;
+								} else {
+									x = canvas.width / 2 - 150;
+								}
+								y += (canvas.height - 100) / zigzags;
+								ctx.lineTo(x, y);
+							}
+							
+							ctx.stroke();
+						}
+					},
+					{
+						name: "Funnel",
+						duration: 6000, // Longer duration to ensure marbles fall through
+						setup: (prevRacers) => {
+							// Sort by completion order from previous stage
+							const sorted = [...prevRacers].sort((a, b) => {
+								if (a.completed && !b.completed) return -1;
+								if (!a.completed && b.completed) return 1;
+								return a.pathProgress - b.pathProgress;
+							});
+							
+							return sorted.map((racer, i) => {
+								return {
+									name: racer.name,
+									color: racer.color,
+									x: canvas.width / 2,
+									y: 50,
+									vx: (Math.random() - 0.5) * 2,
+									vy: 0.5,
+									radius: 15,
+									angle: Math.random() * Math.PI * 2,
+									angularVel: (Math.random() - 0.5) * 0.05,
+									spinRadius: 100,
+									inTube: false,
+									tubeProgress: 0,
+									index: racer.index,
+									position: i,
+									completed: false
+								};
+							});
+						},
+						update: (racers, elapsed, stageDuration) => {
+							// Calculate overall stage progress
+							const stageProgress = Math.min(1, elapsed / stageDuration);
+							
+							// Funnel phase ends at 70% of the stage
+							const funnelEndProgress = 0.7;
+							const inFunnelPhase = stageProgress < funnelEndProgress;
+							
+							racers.forEach(racer => {
+								if (!racer.inTube) {
+									if (inFunnelPhase) {
+										// Spiral motion in funnel
+										racer.angle += racer.angularVel;
+										
+										// Calculate spiral radius that decreases over time
+										const funnelProgress = stageProgress / funnelEndProgress;
+										racer.spinRadius = 100 * (1 - funnelProgress);
+										
+										// Calculate position in spiral
+										racer.x = canvas.width / 2 + Math.cos(racer.angle) * racer.spinRadius;
+										racer.y = canvas.height / 2 - 50 + Math.sin(racer.angle) * racer.spinRadius;
+										
+										// Check if marble should enter tube
+										if (funnelProgress >= 0.95 && Math.random() < 0.05) {
+											racer.inTube = true;
+											racer.tubeProgress = 0;
+											// Slightly randomize entry time for visual effect
+											racer.releaseDelay = Math.random() * 20;
+										}
+									} else {
+										// Force into tube if funnel phase is over
+										racer.inTube = true;
+										racer.tubeProgress = 0;
+									}
+								} else {
+									// Move through tube
+									if (racer.releaseDelay > 0) {
+										racer.releaseDelay--;
+									} else {
+										racer.tubeProgress += 0.02;
+										
+										// Position in tube
+										racer.x = canvas.width / 2;
+										racer.y = (canvas.height / 2 + 50) + racer.tubeProgress * (canvas.height / 2);
+										
+										// Complete when exit tube
+										if (racer.tubeProgress >= 1) {
+											racer.completed = true;
+										}
+									}
+								}
+							});
+							
+							// Complete stage when all marbles have completed OR time is up
+							return racers.every(r => r.completed) || elapsed >= stageDuration;
+						},
+						draw: (ctx, racers) => {
+							// Draw funnel
+							ctx.fillStyle = '#555';
+							ctx.beginPath();
+							ctx.arc(canvas.width / 2, canvas.height / 2 - 50, 120, 0, Math.PI * 2);
+							ctx.fill();
+							
+							ctx.fillStyle = '#222';
+							ctx.beginPath();
+							ctx.arc(canvas.width / 2, canvas.height / 2 - 50, 100, 0, Math.PI * 2);
+							ctx.fill();
+							
+							// Draw exit tube
+							ctx.fillStyle = '#555';
+							ctx.beginPath();
+							ctx.rect(canvas.width / 2 - 30, canvas.height / 2 + 50, 60, canvas.height / 2);
+							ctx.fill();
+							
+							ctx.fillStyle = '#222';
+							ctx.beginPath();
+							ctx.rect(canvas.width / 2 - 20, canvas.height / 2 + 50, 40, canvas.height / 2);
+							ctx.fill();
+						}
+					},
+					{
+						name: "Bumpers",
+						duration: 6000, // New stage
+						setup: (prevRacers) => {
+							// Sort by completion order from previous stage
+							const sorted = [...prevRacers].sort((a, b) => {
+								if (a.completed && !b.completed) return -1;
+								if (!a.completed && b.completed) return 1;
+								return a.tubeProgress - b.tubeProgress;
+							});
+							
+							return sorted.map((racer, i) => {
+								return {
+									name: racer.name,
+									color: racer.color,
+									x: 50,
+									y: 50 + Math.random() * 200,
+									vx: 1 + Math.random() * 1.5,
+									vy: Math.random() * 0.5 - 0.25,
+									radius: 15,
+									index: racer.index,
+									position: i,
+									completed: false,
+									bumperHits: 0
+								};
+							});
+						},
+						update: (racers, elapsed, stageDuration) => {
+							// Define bumpers
+							const bumpers = [
+								{ x: canvas.width * 0.3, y: canvas.height * 0.3, radius: 25 },
+								{ x: canvas.width * 0.5, y: canvas.height * 0.5, radius: 25 },
+								{ x: canvas.width * 0.7, y: canvas.height * 0.7, radius: 25 },
+								{ x: canvas.width * 0.3, y: canvas.height * 0.7, radius: 25 },
+								{ x: canvas.width * 0.7, y: canvas.height * 0.3, radius: 25 }
+							];
+							
+							racers.forEach(racer => {
+								// Update position
+								racer.x += racer.vx;
+								racer.y += racer.vy;
+								
+								// Bounce off walls
+								if (racer.y < racer.radius || racer.y > canvas.height - racer.radius) {
+									racer.vy *= -1;
+									// Add a little x speed when bouncing
+									racer.vx += Math.random() * 0.2;
+								}
+								
+								// Check for bumper collisions
+								bumpers.forEach(bumper => {
+									const dx = racer.x - bumper.x;
+									const dy = racer.y - bumper.y;
+									const distance = Math.sqrt(dx * dx + dy * dy);
+									
+									if (distance < racer.radius + bumper.radius) {
+										// Collision response - reflect velocity
+										const nx = dx / distance;
+										const ny = dy / distance;
+										const dot = racer.vx * nx + racer.vy * ny;
+										
+										racer.vx = racer.vx - 2 * dot * nx;
+										racer.vy = racer.vy - 2 * dot * ny;
+										
+										// Add some randomization
+										racer.vx += (Math.random() - 0.5) * 0.5;
+										racer.vy += (Math.random() - 0.5) * 0.5;
+										
+										// Ensure minimum speed
+										const speed = Math.sqrt(racer.vx * racer.vx + racer.vy * racer.vy);
+										if (speed < 1) {
+											const scale = 1 / speed;
+											racer.vx *= scale;
+											racer.vy *= scale;
+										}
+										
+										racer.bumperHits++;
+									}
+								});
+								
+								// Check for finishing (right edge)
+								if (racer.x > canvas.width - racer.radius) {
+									racer.completed = true;
+								}
+							});
+							
+							// Complete stage when all marbles have completed or time is up
+							return racers.every(r => r.completed) || elapsed >= stageDuration;
+						},
+						draw: (ctx, racers) => {
+							// Draw bumpers
+							const bumpers = [
+								{ x: canvas.width * 0.3, y: canvas.height * 0.3, radius: 25 },
+								{ x: canvas.width * 0.5, y: canvas.height * 0.5, radius: 25 },
+								{ x: canvas.width * 0.7, y: canvas.height * 0.7, radius: 25 },
+								{ x: canvas.width * 0.3, y: canvas.height * 0.7, radius: 25 },
+								{ x: canvas.width * 0.7, y: canvas.height * 0.3, radius: 25 }
+							];
+							
+							bumpers.forEach(bumper => {
+								ctx.fillStyle = '#777';
+								ctx.beginPath();
+								ctx.arc(bumper.x, bumper.y, bumper.radius, 0, Math.PI * 2);
+								ctx.fill();
+								
+								ctx.fillStyle = '#aaa';
+								ctx.beginPath();
+								ctx.arc(bumper.x, bumper.y, bumper.radius - 5, 0, Math.PI * 2);
+								ctx.fill();
+							});
+							
+							// Draw finish line
+							ctx.strokeStyle = '#fff';
+							ctx.setLineDash([10, 10]);
+							ctx.beginPath();
+							ctx.moveTo(canvas.width - 30, 0);
+							ctx.lineTo(canvas.width - 30, canvas.height);
+							ctx.stroke();
+							ctx.setLineDash([]);
+						}
+					},
+					{
+						name: "Finish",
+						duration: 4000,
+						setup: (prevRacers) => {
+							// Sort based on previous stage completion (who hit the finish line first)
+							let racers = [...prevRacers].sort((a, b) => {
+								if (a.completed && !b.completed) return -1;
+								if (!a.completed && b.completed) return 1;
+								return 0; // If both have same completion status, maintain order
+							});
+							
+							// Set up final positions
+							return racers.map((racer, i) => {
+								return {
+									name: racer.name,
+									color: racer.color,
+									x: canvas.width / 2 - 200,
+									y: 100 + i * 30,
+									targetX: canvas.width / 2 + 200,
+									targetY: 100 + i * 30,
+									vx: 5 + Math.random() * 2,
+									radius: 15,
+									index: racer.index,
+									position: i,
+									completed: false
+								};
+							});
+						},
+						update: (racers, elapsed, stageDuration) => {
+							const progress = Math.min(1, elapsed / stageDuration);
+							
+							racers.forEach((racer, i) => {
+								// Final sprint to finish
+								if (!racer.completed) {
+									racer.x += racer.vx;
+									
+									// Slow down near the finish to create drama
+									if (racer.x > canvas.width / 2) {
+										racer.vx *= 0.98;
+									}
+									
+									// Check for finish
+									if (racer.x >= racer.targetX) {
+										racer.x = racer.targetX;
+										racer.completed = true;
+									}
+								}
+							});
+							
+							return racers.every(r => r.completed) || elapsed >= stageDuration;
+						},
+						draw: (ctx, racers) => {
+							// Draw finish line
+							ctx.strokeStyle = '#fff';
+							ctx.setLineDash([10, 10]);
+							ctx.beginPath();
+							ctx.moveTo(canvas.width / 2 + 200, 50);
+							ctx.lineTo(canvas.width / 2 + 200, canvas.height - 50);
+							ctx.stroke();
+							ctx.setLineDash([]);
+							
+							// Draw lane lines
+							ctx.strokeStyle = '#555';
+							ctx.lineWidth = 1;
+							for (let i = 0; i < racers.length; i++) {
+								ctx.beginPath();
+								ctx.moveTo(canvas.width / 2 - 200, 85 + i * 30);
+								ctx.lineTo(canvas.width / 2 + 200, 85 + i * 30);
+								ctx.stroke();
+							}
+							
+							// Draw position labels
+							ctx.fillStyle = 'white';
+							ctx.font = '12px Arial';
+							ctx.textAlign = 'right';
+							
+							racers.forEach((racer, i) => {
+								ctx.fillText(`${i+1}.`, canvas.width / 2 - 210, 105 + i * 30);
+							});
+						}
+					}
+				];
+				
+				let currentStage = 0;
+				let stageStartTime = Date.now();
+				let racers = stages[currentStage].setup();
+				
+				function animate() {
+					ctx.fillStyle = '#222';
+					ctx.fillRect(0, 0, canvas.width, canvas.height);
+					
+					const now = Date.now();
+					const elapsed = now - stageStartTime;
+					const stage = stages[currentStage];
+					
+					// Draw current stage elements
+					stage.draw(ctx, racers);
+					
+					// Update marble positions
+					const stageComplete = stage.update(racers, elapsed, stage.duration);
+					
+					// Draw marbles
+					racers.forEach(racer => {
+						// Draw marble
+						ctx.fillStyle = racer.color;
+						ctx.beginPath();
+						ctx.arc(racer.x, racer.y, racer.radius, 0, Math.PI * 2);
+						ctx.fill();
+						
+						// Draw name
+						ctx.fillStyle = '#fff';
+						ctx.font = '10px Arial';
+						ctx.textAlign = 'center';
+						ctx.fillText(racer.name, racer.x, racer.y - racer.radius - 5);
+					});
+					
+					// Draw stage info
+					ctx.fillStyle = '#fff';
+					ctx.font = '14px Arial';
+					ctx.textAlign = 'left';
+					ctx.fillText(`Stage: ${stage.name}`, 20, 30);
+					
+					// If stage complete, move to next stage or finish
+					if (stageComplete || elapsed >= stage.duration) {
+						currentStage++;
+						
+						if (currentStage < stages.length) {
+							stageStartTime = now;
+							racers = stages[currentStage].setup(racers);
+						} else {
+							// Set final race results based on final stage
+							gameState.raceResults = racers.map(racer => ({
+								index: racer.index,
+								name: gameState.racers[racer.index].name,
+								color: gameState.racers[racer.index].color
+							}));
+							
+							setTimeout(finishRace, 1000);
+							return;
+						}
+					}
+					
+					window.raceAnimationId = requestAnimationFrame(animate);
+				}
+				
+				window.raceAnimationId = requestAnimationFrame(animate);
+			}
+
+			function resetWorld() {
+				// Just reset the race results
+				gameState.raceResults = [];
+				
+				// Clear the canvas if needed
+				const ctx = canvas.getContext('2d');
+				ctx.clearRect(0, 0, canvas.width, canvas.height);
+			}
+
+			// Replace this function
+			function resetRace() {
+				// Cancel any ongoing animation frame if it exists
+				if (window.raceAnimationId) {
+					cancelAnimationFrame(window.raceAnimationId);
+				}
+				
+				resetWorld();
+				gameState.raceInProgress = false;
+			}
+
+            // Finish the race and display results
+			function finishRace() {
+				gameState.raceInProgress = false;
+				
+				// Process bet
+				processBet();
+				
+				// Display results
+				displayResults();
+				
+				// Re-enable controls
+				startRaceButton.disabled = false;
+				placeBetButton.disabled = false;
+				raceWagerInput.disabled = false;
+				marbleSelect.disabled = false;
+				betTypeSelect.disabled = false;
+				addRacerButton.disabled = false;
+				racerNameInput.disabled = false;
+				randomRaceButton.disabled = false;
+				clearRacersButton.disabled = false;
+				shuffleRacersButton.disabled = false;
+				
+				// Re-enable racer removal
+				document.querySelectorAll('.remove-racer').forEach(btn => {
+					btn.style.pointerEvents = 'auto';
+					btn.style.opacity = '1';
+				});
+				
+				gameState.betPlaced = false;
+				saveGameState();
+			}
+
+            // Process bet result
+            function processBet() {
+                if (!gameState.betPlaced) return;
+                
+                const bet = gameState.currentBet;
+                const racerIndex = bet.racerIndex;
+                const betType = bet.betType;
+                const wager = bet.wager;
+                
+                // Find position of bet marble
+                const position = gameState.raceResults.findIndex(r => r.index === racerIndex);
+                
+                let profit = -wager;
+                let win = false;
+                
+                if (betType === 'win' && position === 0) {
+                    profit = wager * 4;
+                    win = true;
+                    gameState.wins++;
+                } else if (betType === 'place' && (position === 0 || position === 1)) {
+                    profit = wager * 2;
+                    win = true;
+                    gameState.wins++;
+                } else if (betType === 'show' && (position === 0 || position === 1 || position === 2)) {
+                    profit = Math.floor(wager * 1.5);
+                    win = true;
+                    gameState.wins++;
+                } else {
+                    gameState.losses++;
+                }
+                
+                // Update credits
+                if (win) {
+                    gameState.credits += profit + wager; // Add back original wager plus profit
+                    showNotification(`You won ${profit} credits!`, 'success');
+                } else {
+                    showNotification('Better luck next time!', 'error');
+                }
+                
+                // Update UI
+                creditBalanceElem.textContent = gameState.credits;
+                
+                // Store bet result
+                gameState.betResult = {
+                    win,
+                    profit,
+                    racer: gameState.racers[racerIndex].name,
+                    position: position
+                };
+            }
+
+            // Display race results
+            function displayResults() {
+                resultsList.innerHTML = '';
+                
+                gameState.raceResults.forEach((result, position) => {
+                    const resultItem = document.createElement('li');
+                    resultItem.className = 'result-item';
+                    
+                    resultItem.innerHTML = `
+                        <span class="position position-${position + 1}">${position + 1}</span>
+                        <div class="marble" style="background-color: ${result.color};"></div>
+                        <span class="racer-name">${result.name}</span>
+                    `;
+                    
+                    resultsList.appendChild(resultItem);
+                });
+                
+                // Show bet result
+                if (gameState.betPlaced) {
+                    const betResult = gameState.betResult;
+                    
+                    betResultElem.innerHTML = betResult.win
+                        ? `<span class="win">You Won! ${betResult.profit} credits</span>`
+                        : `<span class="lose">You Lost</span>`;
+                } else {
+                    betResultElem.innerHTML = '<span>No bet placed</span>';
+                }
+                
+                resultsContainer.classList.add('show');
+            }
+        });
+    </script>
+</body>
+</html>
